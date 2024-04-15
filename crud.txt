@@ -1,0 +1,88 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
+const CrudApp = () => {
+  const [almacenes, setAlmacenes] = useState([]);
+  const [inputAlmacen, setInputAlmacen] = useState('');
+  const [inputUbicacion, setInputUbicacion] = useState('');
+
+  useEffect(() => {
+    fetchAlmacenes();
+  }, []);
+
+  const fetchAlmacenes = async () => {
+    try {
+      const response = await axios.get('http://tu-backend/api/almacenes');
+      setAlmacenes(response.data);
+    } catch (error) {
+      console.error('Error al obtener los almacenes:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    if (e.target.name === 'almacen') {
+      setInputAlmacen(e.target.value);
+    } else if (e.target.name === 'ubicacion') {
+      setInputUbicacion(e.target.value);
+    }
+  };
+
+  const handleAddAlmacen = async () => {
+    try {
+      await axios.post('http://tu-backend/api/almacenes', {
+        Almacen: inputAlmacen,
+        Ubicacion: inputUbicacion
+      });
+      fetchAlmacenes();
+      setInputAlmacen('');
+      setInputUbicacion('');
+    } catch (error) {
+      console.error('Error al agregar el almacén:', error);
+    }
+  };
+
+  return (
+    <div>
+      <TextField 
+        label="Nombre del Almacén" 
+        variant="outlined" 
+        name="almacen"
+        value={inputAlmacen} 
+        onChange={handleInputChange} 
+      />
+      <TextField 
+        label="Ubicación del Almacén" 
+        variant="outlined" 
+        name="ubicacion"
+        value={inputUbicacion} 
+        onChange={handleInputChange} 
+      />
+      <Button onClick={handleAddAlmacen} variant="contained" color="primary">
+        Agregar Almacén
+      </Button>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Almacén</TableCell>
+              <TableCell>Ubicación</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {almacenes.map((almacen, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{almacen.Almacen}</TableCell>
+                <TableCell>{almacen.Ubicacion}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
+  );
+};
+
+export default CrudApp;
